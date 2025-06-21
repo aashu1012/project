@@ -29,36 +29,44 @@ export default function Auth() {
 
   // Login handler
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+  e.preventDefault();
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+      {
         email: loginEmail,
         password: loginPassword,
-      });
-      localStorage.setItem("token", res.data.token);
-      navigate("/");
-    } catch (err) {
-      alert("Login failed: " + err?.response?.data?.error || "Server error");
-    }
-  };
+      }
+    );
+    localStorage.setItem("token", res.data.token);
+    navigate("/");
+  } catch (err) {
+    alert("Login failed: " + (err?.response?.data?.error || "Server error"));
+  }
+};
+
 
   // Register handler
   const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:5000/api/auth/register", {
+  e.preventDefault();
+  try {
+    await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
+      {
         name: regName,
         email: regEmail,
         password: regPassword,
-      });
-      setShowSuccess(true);
-      setRegName("");
-      setRegEmail("");
-      setRegPassword("");
-    } catch (err) {
-      alert("Registration failed: " + err?.response?.data?.error || "Server error");
-    }
-  };
+      }
+    );
+    setShowSuccess(true);
+    setRegName("");
+    setRegEmail("");
+    setRegPassword("");
+  } catch (err) {
+    alert("Registration failed: " + (err?.response?.data?.error || "Server error"));
+  }
+};
+
 
   // Smooth transition classes
   const formContainerClass =

@@ -10,19 +10,23 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post("http://localhost:5000/api/auth/register", {
+  e.preventDefault();
+  try {
+    await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
+      {
         name,
         email,
         password,
-      });
-      alert("Registration successful! Please login.");
-      navigate("/login");
-    } catch (err) {
-      alert("Registration failed: " + err?.response?.data?.error || "Server error");
-    }
-  };
+      }
+    );
+    alert("Registration successful! Please login.");
+    navigate("/login");
+  } catch (err) {
+    alert("Registration failed: " + (err?.response?.data?.error || "Server error"));
+  }
+};
+
 
   // SVG logo for consistency
   const LogoSVG = () => (
