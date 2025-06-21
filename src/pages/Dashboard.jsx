@@ -25,12 +25,13 @@ const PRIORITY_OPTIONS = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-useEffect(() => {
+
+  useEffect(() => {
   const token = localStorage.getItem("token");
   if (!token) {
     navigate("/login");
   }
-}, [navigate]);
+ }, [navigate]);
 
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
