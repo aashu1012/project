@@ -65,85 +65,103 @@ export default function Dashboard() {
   const token = localStorage.getItem("token");
 
   const saveFcmToken = async (fcmToken) => {
-    try {
-      await axios.post("http://localhost:5000/api/user/save-fcm-token", 
-        { fcmToken },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log("FCM token saved successfully");
-    } catch (error) {
-      console.error("Failed to save FCM token", error);
-    }
-  };
+  try {
+    await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/user/save-fcm-token`,
+      { fcmToken },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log("FCM token saved successfully");
+  } catch (error) {
+    console.error("Failed to save FCM token", error);
+  }
+};
+
 
   const fetchTasks = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/tasks", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTasks(res.data);
-    } catch (err) {
-      console.error("Failed to load tasks", err);
-    }
-  };
+  try {
+    const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log("Fetched tasks response:", res.data);
+
+    // Ensure tasks is always an array
+    const fetchedTasks = Array.isArray(res.data) ? res.data : [];
+    setTasks(fetchedTasks);
+  } catch (err) {
+    console.error("Failed to load tasks", err);
+    setTasks([]); // fallback to empty array to prevent UI crash
+  }
+};
+
+
+
 
   const addTask = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(
-        "http://localhost:5000/api/tasks",
-        {
-          title,
-          deadline: deadline ? deadline.toISOString() : null,
-          category,
-          priority,
-          description,
-          subtasks,
-          recurring,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setTitle("");
-      setDeadline(null);
-      setCategory(CATEGORY_OPTIONS[0].value);
-      setPriority(PRIORITY_OPTIONS[1].value);
-      setDescription("");
-      setSubtasks([]);
-      setNewSubtask("");
-      setRecurring('none');
-      fetchTasks();
-      setSelectedSection("tasks");
-    } catch (err) {
-      alert("Failed to add task");
-    }
-  };
+  e.preventDefault();
+  try {
+    await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/tasks`,
+      {
+        title,
+        deadline: deadline ? deadline.toISOString() : null,
+        category,
+        priority,
+        description,
+        subtasks,
+        recurring,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    setTitle("");
+    setDeadline(null);
+    setCategory(CATEGORY_OPTIONS[0].value);
+    setPriority(PRIORITY_OPTIONS[1].value);
+    setDescription("");
+    setSubtasks([]);
+    setNewSubtask("");
+    setRecurring('none');
+    fetchTasks();
+    setSelectedSection("tasks");
+  } catch (err) {
+    alert("Failed to add task");
+  }
+};
+
 
   const deleteTask = async (id) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      stopReminderLoop(id);
-      fetchTasks();
-    } catch (err) {
-      alert("Failed to delete task");
-    }
-  };
+  try {
+    await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/tasks/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    stopReminderLoop(id);
+    fetchTasks();
+  } catch (err) {
+    alert("Failed to delete task");
+  }
+};
+
 
   const markComplete = async (id) => {
-    try {
-      await axios.patch(`http://localhost:5000/api/tasks/${id}/complete`, {}, {
+  try {
+    await axios.patch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/tasks/${id}/complete`,
+      {},
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      stopReminderLoop(id);
-      setStoppedTasks((prev) => [...prev, id]);
-      fetchTasks();
-    } catch (err) {
-      alert("Failed to mark as complete");
-    }
-  };
+      }
+    );
+    stopReminderLoop(id);
+    setStoppedTasks((prev) => [...prev, id]);
+    fetchTasks();
+  } catch (err) {
+    alert("Failed to mark as complete");
+  }
+};
+
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -290,39 +308,40 @@ export default function Dashboard() {
     else setEditError("");
   };
   const saveEdit = async (e) => {
-    e.preventDefault();
-    if (!editForm.title.trim()) {
-      setEditError("Title is required");
-      return;
-    }
-    setEditLoading(true);
-    setEditError("");
-    try {
-      await axios.patch(
-        `http://localhost:5000/api/tasks/${editTask._id}`,
-        {
-          title: editForm.title,
-          description: editForm.description,
-          deadline: editForm.deadline ? editForm.deadline.toISOString() : null,
-          category: editForm.category,
-          priority: editForm.priority,
-          subtasks: editSubtasks,
-          recurring: editRecurring,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      closeEditModal();
-      setShowEditSuccess(true);
-      fetchTasks();
-      setTimeout(() => setShowEditSuccess(false), 2000);
-    } catch (err) {
-      setEditError("Failed to update task");
-    } finally {
-      setEditLoading(false);
-    }
-  };
+  e.preventDefault();
+  if (!editForm.title.trim()) {
+    setEditError("Title is required");
+    return;
+  }
+  setEditLoading(true);
+  setEditError("");
+  try {
+    await axios.patch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/tasks/${editTask._id}`,
+      {
+        title: editForm.title,
+        description: editForm.description,
+        deadline: editForm.deadline ? editForm.deadline.toISOString() : null,
+        category: editForm.category,
+        priority: editForm.priority,
+        subtasks: editSubtasks,
+        recurring: editRecurring,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    closeEditModal();
+    setShowEditSuccess(true);
+    fetchTasks();
+    setTimeout(() => setShowEditSuccess(false), 2000);
+  } catch (err) {
+    setEditError("Failed to update task");
+  } finally {
+    setEditLoading(false);
+  }
+};
+
   // Close modal on outside click or Esc
   useEffect(() => {
     if (!editTask) return;
@@ -344,26 +363,30 @@ export default function Dashboard() {
 
   // Fetch profile
   const fetchProfile = async () => {
-    setProfileLoading(true);
-    setProfileError("");
-    try {
-      const res = await axios.get("http://localhost:5000/api/auth/user/profile", {
+  setProfileLoading(true);
+  setProfileError("");
+  try {
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/user/profile`,
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setProfile(res.data);
-      setProfileForm({
-        name: res.data.name,
-        email: res.data.email,
-        currentPassword: '',
-        newPassword: '',
-        notificationPrefs: res.data.notificationPrefs || { email: true, browser: true },
-      });
-    } catch (err) {
-      setProfileError("Failed to load profile");
-    } finally {
-      setProfileLoading(false);
-    }
-  };
+      }
+    );
+    setProfile(res.data);
+    setProfileForm({
+      name: res.data.name,
+      email: res.data.email,
+      currentPassword: '',
+      newPassword: '',
+      notificationPrefs: res.data.notificationPrefs || { email: true, browser: true },
+    });
+  } catch (err) {
+    setProfileError("Failed to load profile");
+  } finally {
+    setProfileLoading(false);
+  }
+};
+
   const openProfile = () => {
     setShowProfile(true);
     fetchProfile();
@@ -388,47 +411,52 @@ export default function Dashboard() {
     }
   };
   const saveProfile = async (e) => {
-    e.preventDefault();
-    setProfileLoading(true);
-    setProfileError("");
-    try {
-      await axios.patch(
-        "http://localhost:5000/api/auth/user/profile",
-        {
-          name: profileForm.name,
-          email: profileForm.email,
-          currentPassword: profileForm.currentPassword || undefined,
-          newPassword: profileForm.newPassword || undefined,
-          notificationPrefs: profileForm.notificationPrefs,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setProfileSuccess(true);
-      setTimeout(() => setProfileSuccess(false), 2000);
-      fetchProfile();
-    } catch (err) {
-      setProfileError("Failed to update profile");
-    } finally {
-      setProfileLoading(false);
-      setProfileForm((prev) => ({ ...prev, currentPassword: '', newPassword: '' }));
-    }
-  };
-  const deleteAccount = async () => {
-    setProfileLoading(true);
-    setProfileError("");
-    try {
-      await axios.delete("http://localhost:5000/api/auth/user/profile", {
+  e.preventDefault();
+  setProfileLoading(true);
+  setProfileError("");
+  try {
+    await axios.patch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/user/profile`,
+      {
+        name: profileForm.name,
+        email: profileForm.email,
+        currentPassword: profileForm.currentPassword || undefined,
+        newPassword: profileForm.newPassword || undefined,
+        notificationPrefs: profileForm.notificationPrefs,
+      },
+      {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    } catch (err) {
-      setProfileError("Failed to delete account");
-      setProfileLoading(false);
-    }
-  };
+      }
+    );
+    setProfileSuccess(true);
+    setTimeout(() => setProfileSuccess(false), 2000);
+    fetchProfile();
+  } catch (err) {
+    setProfileError("Failed to update profile");
+  } finally {
+    setProfileLoading(false);
+    setProfileForm((prev) => ({ ...prev, currentPassword: '', newPassword: '' }));
+  }
+};
+
+  const deleteAccount = async () => {
+  setProfileLoading(true);
+  setProfileError("");
+  try {
+    await axios.delete(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/user/profile`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  } catch (err) {
+    setProfileError("Failed to delete account");
+    setProfileLoading(false);
+  }
+};
+
 
   return (
     <div className={`min-h-screen p-0 glass-bg ${theme}`}>
