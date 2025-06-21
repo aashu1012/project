@@ -181,7 +181,7 @@ useEffect(() => {
 
   const logout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/login";
+    navigate("/login");;
   };
 
   const startReminderLoop = (task) => {
