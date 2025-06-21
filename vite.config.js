@@ -28,7 +28,6 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallback: '/offline.html',
         navigateFallbackDenylist: [/^\/login/],
         navigateFallback: '/offline.html', // 👈 Fallback page when offline
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
