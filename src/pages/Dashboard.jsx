@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -6,6 +7,8 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./Dashboard.css";
 import { requestForToken } from "../firebase";
+
+
 
 const CATEGORY_OPTIONS = [
   { value: "work", label: "Work", color: "#6366f1" },
@@ -19,7 +22,16 @@ const PRIORITY_OPTIONS = [
   { value: "low", label: "Low", color: "#22c55e" },
 ];
 
+
 export default function Dashboard() {
+  const navigate = useNavigate();
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    navigate("/login");
+  }
+}, [navigate]);
+
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [deadline, setDeadline] = useState(null);
@@ -79,19 +91,23 @@ export default function Dashboard() {
 
 
   const fetchTasks = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    console.warn("No token found — skipping task fetch");
+    return;
+  }
+
   try {
     const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/tasks`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
     console.log("Fetched tasks response:", res.data);
-
-    // Ensure tasks is always an array
     const fetchedTasks = Array.isArray(res.data) ? res.data : [];
     setTasks(fetchedTasks);
   } catch (err) {
-    console.error("Failed to load tasks", err);
-    setTasks([]); // fallback to empty array to prevent UI crash
+    console.error("Failed to load tasks:", err.response?.data || err.message);
+    setTasks([]); // fallback to empty array
   }
 };
 
